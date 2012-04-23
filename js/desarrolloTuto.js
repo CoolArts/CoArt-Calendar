@@ -1,7 +1,7 @@
 //Si te interesa el tuto y no sabes trabajar con fechas, revisa el tutorial
 //"El Objeto Date, su métodos, ejemplos prácticos y ejercicios" en Cristalab.com:
 //url: http://foros.cristalab.com/el-objeto-date-su-metodos-ejemplos-practicos-y-ejercicios-t105282/
-caCal(new Date());
+
 //Creamos la funcion principal
 function caCal (fecha) {
 	//Si no se pasa una fecha, se toma la fecha del día en curso
@@ -14,7 +14,9 @@ function caCal (fecha) {
 		//Y el nombre de los meses
 		//Más tarde podremos ampliar los idiomas haciendo un objeto con estos datos
 		diasSemanaES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-		mesesES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+		mesesES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+		//Por último vamos a hacer lo mismo con los días de los meses
+		diasMeses = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 		
 	//Vamos a empezar por crear la funciones que nos harán falta
 	//Al final del tutorial estas funciones serán métodos del plug-in
@@ -26,8 +28,11 @@ function caCal (fecha) {
 	//Así que empezaremos por crear la función que nos devolverá los días semanales correctos
 	//Le tendremos que pasar obligatoriamente un objeto Date
 	function calcularDiaSemanal(fechaPasada) {
-		//Si no recibimos la fecha lanzamos una excepción a la consola
-		if (!fechaPasada) {console.log('Error en funcion:\nCalcularComienzoPrimeraSemana\n\nFecha requerida')};
+		//Si no recibimos la fecha lanzamos una excepción a la consola y devolvemos false
+		if (!fechaPasada) {
+			console.log('Error en funcion:\nCalcularComienzoPrimeraSemana\n\nFecha requerida');
+			return false;
+		};
 		//Almacenamos el número de día semanal en una variable
 		var diaSemana = fechaPasada.getDay();
 		//Ahora efectuamos el cambio de los números
@@ -55,16 +60,17 @@ function caCal (fecha) {
 		for (d in arrayFechas) {
 			//Declaramos una variable y la igualamos a 0,
 			//en ella almacenaremos un 1 si el año de la fecha es bisiexto
-			var bisiexto = 0;
+			var bisiexto = 0,
 			//Obtenemos el año de la fecha actual
-			var anoArray = arrayFechas[d].getFullYear();
+				anoArray = arrayFechas[d].getFullYear();
 			//Comprobamos si el año es bisiexto, y si lo es...
 			if (anoArray%4 == 0 && anoArray%100 != 0 || anoArray%400 == 0) {bisiexto = 1};
-			//Ahora creamos un array con los días de los meses del año
-			//Y le sumamos la variable bisiexto a febrero
-			var diasMeses = [31, (28+bisiexto), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-			//E incrementamos totalDias, los días del mes correspondiente
+			//le sumamos la variable bisiexto a febrero,
+			diasMeses[1] += bisiexto;
+			//e incrementamos totalDias, los días del mes correspondiente
 			totalDias += diasMeses[arrayFechas[d].getMonth()];
+			//Reestablecemos Febrero
+			diasMeses[1] = 28;
 		}
 		//Por último devolvemos la suma total
 		return totalDias;
