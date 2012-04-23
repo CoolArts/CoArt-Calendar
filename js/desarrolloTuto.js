@@ -145,6 +145,7 @@ function caCal (fecha) {
 		
 		//Lo primero que vamos a hacer es insertar un div an final del contenedor,
 		//que será a su vez el contenedor de nuestro calendario.
+		//------------------------------------------------------------------------
 		//Empezaremos por almacenar en una variable la id seleccionable de nuestro contenedor principal
 		var contenedorCal_selId = '#'+contenedor;
 		//Vamos a detectar si ya hay algún calendario en el DOM
@@ -154,7 +155,7 @@ function caCal (fecha) {
 		//Y por cada calendario que haya, incrementaremos en 1 la variable calendariosInstanciados
 		$('.coArtCa_Contenedor').each(function () {calendariosInstanciados++});
 		//Ahora vamos a almacenar la nueva id personalizada de nuestro calendario en una varibale
-		var caCal_id = 'coArCat_Contenedor'+calendariosInstanciados;
+		var caCal_id = 'coArtCa_Contenedor'+calendariosInstanciados;
 		//Vamos a crear nuestro div contenedor del calendario
 		$(contenedorCal_selId)
 			//Agregamos nuestro calendario al final del contenido de nuestro contenedor
