@@ -23,6 +23,7 @@
 	6º - ¿Hacerlo Dragable?
 	7º - Convertirlo en un plug-in
 	8º - Funcionalidad de idiomas
+	9º - Una vez acabado (post-tutorial), optimizar todos los nombres de los códigos y adaptar todas las palabras a inglés, para un mayor alcance en el soporte vía gitHub y para hacer un calendar al que se le pueda dar un uso más globalizado.
 */
 
 ///////////////////////////////////////////////////////////////////////////////
