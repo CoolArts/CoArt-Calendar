@@ -1,104 +1,153 @@
+Ôªø//Si est√° leyendo esto en gitHub antes de que est√© publicado en cristalab,
+//deber√°s saber que el codigo a continuaci√≥n puede contener fallos y cosas mal estructuradas,
+//es un tutorial y est√° en proceso de desarrollo, no tengo una base desde la que lo est√© haciendo,
+//por lo que cada palabra a continuaci√≥n ha salido de mi cabeza (grande todo sea dicho (-_-) ),
+//y como ya he dicho, es posible que contenga fallos, pues no lo veo haciendo en orden
+//y habr√° partes que encontrar√©is no depuradas.
+
+//Si ves fallos o tienes id√©as de como hacerlo mejor, te agradecer√≠a que la aportases,
+//y en el momento de publicarlas, estar√≠an incorporadas con una menci√≥n a tu usuario de clab
+//o en su defecto a t√∫ nombre.
+
+///////////////////////////////////////////////////////////////////////////////
+////////////////////////////IDEAS POR INCORPORAR///////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/*
+	1¬∫ - Hacer el cambio de los meses o a√±os en el calendario
+		a. En el momento de la creaci√≥n o de cambiar los meses, que tambi√©n genere los meses adyacentes (ocultos), y que cambie de mes tipo slide, de izquierda a derecha incluidos los a√±os
+		b. Cada vez que se cambiara de mes se genera√≠a un nuevo mes oculto, y el mes desplazado a 2 posiciones del central se eliminar√≠a
+	2¬∫ - Usar las fechas para obtener Tweets de usuarios
+	3¬∫ - Funci√≥n para hacer c√°lculos entre 2 fechas o m√°s
+	4¬∫ - Funci√≥n (¬ø¬øcon php incorporado??), para hacer una especie de sistema de reservas o algo parecido
+	5¬∫ - Hacer 2 tipos de calendario en funci√≥n del tama√±o de su contenedor objetivo
+	6¬∫ - ¬øHacerlo Dragable?
+	7¬∫ - Convertirlo en un plug-in
+	8¬∫ - Funcionalidad de idiomas
+*/
+
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////TUTORIAL/////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 //Si te interesa el tuto y no sabes trabajar con fechas, revisa el tutorial
-//"El Objeto Date, su mÈtodos, ejemplos pr·cticos y ejercicios" en Cristalab.com:
+//"El Objeto Date de JavaScript" en Cristalab.com:
 //url: http://foros.cristalab.com/el-objeto-date-su-metodos-ejemplos-practicos-y-ejercicios-t105282/
 
+$(document).ready(function () {caCal('calendario');});
+
 //Creamos la funcion principal
-function caCal (fecha) {
-	//Si no se pasa una fecha, se toma la fecha del dÌa en curso
+function caCal (contenedor, anchoContenedor, fecha) {
+	//Si no se pasa una fecha, se toma la fecha del d√≠a en curso
 	if (!fecha) {fecha = new Date()};
-	//Para nuestra comodidad almacenamos tambiÈn la fecha subdividida en aÒo, mes y dÌa
+	//Para nuestra comodidad almacenamos tambi√©n la fecha subdividida en a√±o, mes y d√≠a
 	var ano = fecha.getFullYear(),
 		mes = fecha.getMonth(),
 		dia = fecha.getDate(),
-		//TambiÈn almacenaremos los dÌas de la semana en nuestro idioma
-		//Y el nombre de los meses
-		//M·s tarde podremos ampliar los idiomas haciendo un objeto con estos datos
-		diasSemanaES = ['Lunes', 'Martes', 'MiÈrcoles', 'Jueves', 'Viernes', 'S·bado', 'Domingo'],
-		mesesES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-		//Por ˙ltimo vamos a hacer lo mismo con los dÌas de los meses
+		//Tambi√©n almacenaremos los d√≠as de la semana
+		//y los nombres de los meses en los idiomas que queramos
+		//Al final del tuto guardaremos un json con los idiomas
+		idiomas = {
+			es : {
+				dias: ['Lunes', 'Martes', 'Mi√©rcoles', 'Jueves', 'Viernes', 'S√°bado', 'Domingo'],
+				meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+			},
+			en : {
+				dias: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+				meses: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+			}
+		};
+		//Setearemos el idioma por defecto
+		idioma = 'es';
+		//Por √∫ltimo vamos a hacer lo mismo con los d√≠as de los meses
 		diasMeses = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 		
-	//Vamos a empezar por crear la funciones que nos har·n falta
-	//Al final del tutorial estas funciones ser·n mÈtodos del plug-in
-	//Con las que el usuario podr· trabajar con fechas a su antojo
+	//Vamos a empezar por crear la funciones que nos har√°n falta
+	//Al final del tutorial estas funciones ser√°n m√©todos del plug-in
+	//Con las que el usuario podr√° trabajar con fechas a su antojo
 	
-	//Tenemos un problema, nuestros dÌas de la semana empiezan en lunes,
-	//sin embargo, los dÌas de la semana del objeto Date comienzan en domingo,
-	//por lo que tendremos que configurar un pequeÒo fix para obtener el dÌa correcto.
-	//AsÌ que empezaremos por crear la funciÛn que nos devolver· los dÌas semanales correctos
-	//Le tendremos que pasar obligatoriamente un objeto Date
+	//Tenemos un problema, nuestros d√≠as de la semana empiezan en lunes,
+	//sin embargo, los d√≠as de la semana del objeto Date comienzan en domingo,
+	//por lo que tendremos que configurar un peque√±o arreglo para obtener el d√≠a correcto.
+	//As√≠ que empezaremos por crear la funci√≥n que nos devolver√° los d√≠as semanales correctos
 	function calcularDiaSemanal(fechaPasada) {
-		//Si no recibimos la fecha lanzamos una excepciÛn a la consola y devolvemos false
-		if (!fechaPasada) {
-			console.log('Error en funcion:\nCalcularComienzoPrimeraSemana\n\nFecha requerida');
-			return false;
-		};
-		//Almacenamos el n˙mero de dÌa semanal en una variable
+		//Si no recibimos la fecha, configuramos la de hoy y lo avisamos por la consola
+		if (!fechaPasada) {fechaPasada = new Date()};
+		//Almacenamos el n√∫mero de d√≠a semanal en una variable
 		var diaSemana = fechaPasada.getDay();
-		//Ahora efectuamos el cambio de los n˙meros
-		//Si el dÌa obtenido es 0 lo convertiremos en 6,
-		//si es cualquier otro le restaremos 1, asÌ el lunes ser· 0 y el domingo 6
+		//Ahora efectuamos el cambio de los n√∫meros
+		//Si el d√≠a obtenido es 0 lo convertiremos en 6,
+		//si es cualquier otro le restaremos 1, as√≠ el lunes ser√° 0 y el domingo 6
 		if (diaSemana == 0) {diaSemana = 6}
 		else {diaSemana --};
-		//Y por ˙ltimo devolvemos el dÌa fixeado
+		//Y por √∫ltimo devolvemos el d√≠a arreglado
 		return diaSemana;
 	}
 	
-	//Ahora crearemos una funciÛn que nos devolver· cantidades de dÌas de meses completos
+	//Ahora crearemos una funci√≥n que nos devolver√° cantidades de d√≠as de meses completos
 	//Le pasaremos un array con fechas
-	//Si le pasamos sÛlo una fecha, nos devolver· los dÌas de ese mes
-	//Si le pasamos m·s de una, nos devolver· la suma de todos los dÌas de esos meses
+	//Si no le pasamos fecha configuramos la fecha actual (¬°importante¬°, en un array)
+	//Si le pasamos s√≥lo una fecha, nos devolver√° los d√≠as de ese mes
+	//Si le pasamos m√°s de una, nos devolver√° la suma de todos los d√≠as de esos meses
 	function calcularDiasMeses (arrayFechas) {
-		//Si no hay array o est· vacÌo lazamos una excepciÛn a la consola
 		if (!arrayFechas || arrayFechas.length < 1) {
-			alert('Error en funcion:\ncalcularDiasMes\n\nSe requiere mÌnimo una fecha')
+			arrayFechas = [new Date()];
 		};
-		//Declaramos la variable totalDias, y le iremos sumando los dÌas de los meses,
+		//Declaramos la variable totalDias, y le iremos sumando los d√≠as de los meses,
 		//Finalmente la devolveremos
 		var totalDias = 0;
-		//Ahora revisamos cada posiciÛn del array
+		//Ahora revisamos cada posici√≥n del array
 		for (d in arrayFechas) {
 			//Declaramos una variable y la igualamos a 0,
-			//en ella almacenaremos un 1 si el aÒo de la fecha es bisiexto
+			//en ella almacenaremos un 1 si el a√±o de la fecha es bisiexto
 			var bisiexto = 0,
-			//Obtenemos el aÒo de la fecha actual
+			//Obtenemos el a√±o de la fecha actual
 				anoArray = arrayFechas[d].getFullYear();
-			//Comprobamos si el aÒo es bisiexto, y si lo es...
+			//Comprobamos si el a√±o es bisiexto, y si lo es...
 			if (anoArray%4 == 0 && anoArray%100 != 0 || anoArray%400 == 0) {bisiexto = 1};
 			//le sumamos la variable bisiexto a febrero,
 			diasMeses[1] += bisiexto;
-			//e incrementamos totalDias, los dÌas del mes correspondiente
+			//e incrementamos totalDias, los d√≠as del mes correspondiente
 			totalDias += diasMeses[arrayFechas[d].getMonth()];
 			//Reestablecemos Febrero
 			diasMeses[1] = 28;
 		}
-		//Por ˙ltimo devolvemos la suma total
+		//Por √∫ltimo devolvemos la suma total
 		return totalDias;
 	}
 	
-	//Ahora crearemos una funciÛn que nos calcular· cuantas semanas abarca el mes de una fecha que le pasemos,
-	//El n˙mero de semanas puede variar entre 4 y 6.
+	//Vamos a crear una est√∫pida funci√≥n que nos devolver√° el primer d√≠a del mes de la fecha pasada.
+	//s√≠mplemente para ahorrarnos ecribir en adelante.
+	function primerDia (fechaPasada) {
+		//si no se le pasa fecha se configura la de hoy
+		if (!fechaPasada) {fechaPasada = new Date()};
+		//y devolvemos el d√≠a 1
+		return new Date(fechaPasada.getFullYear(), fechaPasada.getMonth());
+	}
+	
+	//Ahora crearemos una funci√≥n que nos calcular√° cuantas semanas abarca el mes de una fecha que le pasemos,
+	//El n√∫mero de semanas puede variar entre 4 y 6.
 	function calcularSemanasCalendario (fechaPasada) {
-		//Como siempre comenzaremos por configurar nuestra excepciÛn
-		if (!fechaPasada) {console.log('Error en funcion:\ncalcularSemanasCalendario\n\nFalta el objeto Date')};
-		//Lo primero que necesitamos saber es en que dÌa semanal comienza el mes
-		//AsÌ que, vamos a echar mano de nuestra funciÛn "calcularDiaSemanal()"
-		var diaSemanal = calcularDiaSemanal(new Date(fechaPasada.getFullYear(), fechaPasada.getMonth(), 1));
-		//Y despuÈs necesitaremos saber los dÌas de nuestro mes, usaremos nuestra funciÛn "calcularDiasMeses()"
-		var diasTotales = calcularDiasMeses([fechaPasada]);
-		//Ahora vamos a restarle a dÌasTotales, 7 menos el dÌa semanal
-		var restoDeDias = diasTotales - (7 - diaSemanal);
-		//Y vamos a devolver 1 + restoDeDias divido por 7 redondeado hacia arriba,
-		//Este ser· el numero de semanas que tiene nuestro mes
+		//Como siempre comenzaremos por comprobar si se ha pasado una fecha,
+		//y si no se ha pasado generamos la del d√≠a en curso
+		if (!fechaPasada) {fechaPasada = new Date()};
+		//Lo primero que necesitamos saber es en que d√≠a semanal comienza el mes
+		//As√≠ que, vamos a echar mano de nuestra funci√≥n "calcularDiaSemanal()"
+		var diaSemanal = calcularDiaSemanal(primerDia(fechaPasada)),
+		//Y despu√©s necesitaremos saber los d√≠as de nuestro mes, usaremos nuestra funci√≥n "calcularDiasMeses()"
+			diasTotales = calcularDiasMeses([fechaPasada]),
+		//Ahora vamos a restarle a d√≠asTotales, 7 menos el d√≠a semanal
+			restoDeDias = diasTotales - (7 - diaSemanal);
+		//Y vamos a devolver 1 + (redondeando hacia arriba restoDeDias divido por 7),
+		//Este ser√° el numero de semanas que abarca nuestro mes
 		return 1+(Math.ceil(restoDeDias/7));
 	}
 	
-	//Y por ˙ltimo una funciÛn que nos ayudar· a trabajar con milisegundos
-	//Esta funciÛn est· explicada al final de este tutorial, en el ejercicio 2
+	//Y por √∫ltimo una funci√≥n que nos ayudar√° a trabajar con milisegundos
+	//Esta funci√≥n est√° explicada en el ejercicio 2 del tutorial que indico en la presentaci√≥n,
 	//url: http://foros.cristalab.com/el-objeto-date-su-metodos-ejemplos-practicos-y-ejercicios-t105282/
 	function convertirMilisegundos (cantidad, unidad, modo) {
 		if (arguments.length != 3) {
-			console.log('La funciÛn convertirMilisegundos requiere exactamente 3 par·metros\ncantidad, unidad, modo');
+			console.log('La funci√≥n convertirMilisegundos requiere exactamente 3 par√°metros\ncantidad, unidad, modo');
 			return false
 		}
 		var valor = 0;
@@ -120,67 +169,155 @@ function caCal (fecha) {
 	De momento no nos interesa lo bonito u horripilante que pueda quedar,
 	lo que nos interesa es rellenarlo con los datos que necesitemos, ya nos ocuparemos de los estilos al final.
 	Vamos a necesitar un contenedor donde meterlo y opcionalmente la medida del ancho completo,
-	el alto variar· en funciÛn de las semanas que tenga el mes y el ancho que tenga el calendario,
-	por lo que le pasaremos los par·metros contenedor y anchoContenedor.
+	el alto variar√° en funci√≥n de las semanas que tenga el mes y el ancho que tenga el calendario,
+	por lo que le pasaremos los par√°metros contenedor y anchoContenedor.
 	*/
 	
-	//TambiÈn le vamos a aÒadir los nuevos par·metros a nuestra funciÛn principal
+	//Tambi√©n le vamos a a√±adir los nuevos par√°metros a nuestra funci√≥n principal
 	//ANTES:
 	function caCal (fecha) {'...'}
 	//AHORA:
 	function caCal (contenedor, anchoContenedor, fecha) {'...'}
-	//dejaremos anchoContenedor y fecha al final, ya que ser·n par·metros opcionales
+	//dejaremos anchoContenedor y fecha al final, ya que ser√°n par√°metros opcionales
 	
-	//La variable "contenedor" ser· la id del contenedor, ser· un string ej:('miContenedor')
+	//La variable "contenedor" ser√° la id del contenedor, ser√° un string ej:('miContenedor')
+	dibujarCalendario(fecha, contenedor);
 	
-	function dibujarCalendario (contenedor, anchoContenedor) {
+	//1-////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
+	///////////////PREPARAR PARA TAMA√ëO PEQUE√ëO Y GRANDE
+	////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
+	
+	//2-////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
+	///////////////CALCULOS FUTUROS CON FECHAS
+	////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////	
+	
+	function dibujarCalendario (fechaDib, contenedorDib, anchoContenedor) {
 
 		/*
-		OK, pensemos todo lo que nos har· falta para dibujar nuestro calendario
-		1∫ Necesitaremos una id personalizada, por si vamos a usar m·s de un calendario
-		2∫ DespuÈs necesitamos saber en que dÌa de la semana empieza el mes que queremos dibujar
-		3∫ TambiÈn necesitamos conocer la cantidad de dÌas que tiene el mes requerido
-		4∫ Y por ˙ltimo, necesitamos saber el numero de semanas que ocupa nuestro mes
+		OK, pensemos todo lo que nos har√° falta para dibujar nuestro calendario
+		1¬∫ Necesitaremos una id personalizada, por si vamos a usar m√°s de un calendario
+		2¬∫ Despu√©s necesitamos saber en que d√≠a de la semana empieza el mes que queremos dibujar
+		3¬∫ Tambi√©n necesitamos conocer la cantidad de d√≠as que tiene el mes requerido
+		4¬∫ Y, aunque no nos hace falta, ya que tenemos la funci√≥n que nos calcula la extensi√≥n de semanas de un mes. La usaremos.
 		*/
 		
 		//Lo primero que vamos a hacer es insertar un div an final del contenedor,
-		//que ser· a su vez el contenedor de nuestro calendario.
+		//que ser√° a su vez el contenedor de nuestro calendario.
 		//------------------------------------------------------------------------
 		//Empezaremos por almacenar en una variable la id seleccionable de nuestro contenedor principal
-		var contenedorCal_selId = '#'+contenedor;
-		//Vamos a detectar si ya hay alg˙n calendario en el DOM
-		//En funciÛn de los que haya, personalizaremos la id de nuestro calendario
-		//Creamos un variable de valor 0 en la que los contaremos
-		var calendariosInstanciados = 0;
+		var contenedorCal_selId = '#'+contenedorDib,
+		//Vamos a detectar si ya hay alg√∫n calendario en el DOM,
+		//en funci√≥n de los que haya, personalizaremos la id de nuestro calendario.
+		//Vamos a definir una variable de valor 0 en la que los contaremos
+			calendariosInstanciados = 0,
+		//Tambi√©n vamos a ir rellenando una variable cada vez que pintemos un d√≠a
+		//y con el comprobaremos si hemos rellenado el mes completamente.
+			diasPintados = 0;
 		//Y por cada calendario que haya, incrementaremos en 1 la variable calendariosInstanciados
-		$('.coArtCa_Contenedor').each(function () {calendariosInstanciados++});
+		$('.coArtCal_Contenedor').each(function () {calendariosInstanciados++});
 		//Ahora vamos a almacenar la nueva id personalizada de nuestro calendario en una varibale
-		var caCal_id = 'coArtCa_Contenedor'+calendariosInstanciados;
+		var caCal_id = 'coolArtsCalendar-'+calendariosInstanciados;
+		
 		//Vamos a crear nuestro div contenedor del calendario
 		$(contenedorCal_selId)
 			//Agregamos nuestro calendario al final del contenido de nuestro contenedor
 			//Le damos una id personalizada
 			.append($('<div id="'+caCal_id+'" />')
-				//Le aÒadimos la clase coArtCa_Contenedor
-				.addClass('coArtCa_Contenedor')
-			);
-			
-		//Ahora crearemos la cabecera con los dÌas de la semana
-		////////////////////////////
-		//FALTA CODIGO Y EXPLICACION
-		////////////////////////////
+				//Le a√±adimos la clase coolArtsCalendar
+				.addClass('coolArtsCalendar') );
+				//Lo ocultaremos para rellenarlo oculto
+				//Y lo mostraremos una vez relleno
+				//.hide() );
 		
-		//El siguiente paso va a ser insertar un div por cada dÌa anterior al primer dÌa
-		//DespuÈs insertaremos un div por cada dÌa del mes y le daremos su clase en funciÛn a si es el dÌa seleccionado, si no lo es, diferenciaremos los dÌas de la semana y los de fin de semana
-		//Y por ˙ltimo insertaremos un div por cada dÌa que reste para rellenar el mes
+		//El siguiente paso ser√° crear la cabecera e insertar un div por cada d√≠a anterior al primer d√≠a.
+		//Despu√©s insertaremos un div por cada d√≠a del mes,
+		//y le daremos su clase en funci√≥n a si es el d√≠a de hoy,
+		//si no lo es, diferenciaremos los d√≠as de la semana y los de fin de semana.
+		//Y por √∫ltimo insertaremos un div por cada d√≠a que reste para rellenar el mes.
 		
 		//Empezaremos almacenando nuestro contenedor en una variable
-		var contenedorDias_selId = '#' + caCal_id;
-		var contenedorDias = $(contenedorDias_selId);
-		//Ahora por cada dia de la semana anterior al primer dia semanal de nuestro mes insertaremos un div con la clase diaDeOtroMes
-		for (i=0; i<diaDeLaSemana; i++) {
-			contenedorDias.append();
+		var contenedorDias_selId = '#' + caCal_id,
+			$contenedorDias = $(contenedorDias_selId);
+		
+		//Ahora crearemos la cabecera con los d√≠as de la semana
+		for (diaSemanal in idiomas[idioma].dias) {
+			var dial = idiomas[idioma].dias[diaSemanal];
+			$contenedorDias.append($('<div class="coArtCal_diaCabecera" />').html(dial))
 		}
+		
+		//1-////////////////////////////////////
+		//Meter en contenedor para cambio de mes
+		////////////////////////////////////////
+		
+		//Calculemos en que d√≠a cae el primer d√≠a del mes (con el d√≠a semanal correcto)
+		var diaDeLaSemana = calcularDiaSemanal(primerDia(fechaDib));
+		
+		//*-/////////////////////////////////////////
+		//Pensar en visualizaci√≥n de los meses y a√±os
+		/////////////////////////////////////////////
+		
+		//Ahora por cada dia de la semana, anterior al primer dia semanal de nuestro mes,
+		//insertaremos un div con la clase diaDeOtroMes y lo rellenaremos con el d√≠a que corresponda.
+		//Necesitamos saber cuantos d√≠as tiene nuestro mes anterior,
+		//Le diremos a nuestra funci√≥n calcularDiasMeses() que nos lo diga
+		//primero almacenamos el numero de mes anterior
+		var mesAnterior = fechaDib.getMonth()-1;
+		//si el mes anterior resulta ser diciembre, es decir -1, lo converimos en 11
+		if (mesAnterior == -1) {mesAnterior = 11};
+		//Ahora ya podemos calcular los d√≠as del mes anterior sin errores
+		//El a√±o nos da igual pues los meses siempre tienen los mismos d√≠as,
+		//a excepci√≥n de febrero en los a√±os bisiextos,
+		//pero nuestra funci√≥n calcularDiasMeses ya arregla esto.
+		var diasMesAnterior = calcularDiasMeses([new Date(fechaDib.getFullYear(), mesAnterior)]);
+		//bien, ahora nos toca restarle los d√≠as que queramos incluir en el calendario,
+		//que ser√° el d√≠a semanal del primer d√≠a -1
+		//esto los hacemos para que el primer d√≠a que rellenemos sea ese,
+		//y despu√©s lo iremos incrementando en 1.
+		diasMesAnterior -= diaDeLaSemana-1;
+				
+		for (i=0; i<diaDeLaSemana; i++) {
+			//2-////////////////////////////////
+			//Check si es una fecha seleccionada
+			////////////////////////////////////
+			
+			$contenedorDias.append($('<a class="diaDeOtroMes" />')
+				.html(diasMesAnterior) );
+			//incrementamos en 1 los d√≠as pintados y el d√≠as del mes anterior
+			diasMesAnterior++;
+			diasPintados++;
+		}
+		
+		//Ahora por cada d√≠a del mes una casilla con su d√≠a
+		for (i=1; i<=calcularDiasMeses([fechaDib]); i++) {
+			//2-////////////////////////////////
+			//Check si es el dia de hoy
+			////////////////////////////////////
+			$contenedorDias
+				.append($('<a class="diaMes" />')
+					.html(i) );
+			//incrementamos en 1 los d√≠as pintados
+			diasPintados++;
+		}
+		
+		//Y por √∫ltimo comprobamos si hemos rellenado todos los d√≠as visibles de las semanas,
+		//y lo que sobre lo rellenamos con nuevas casillas con clase 'diaDeOtroMes'
+		//Para ir r√°pido echamos mano de nuestra funci√≥n para calcular las semanas
+		//y lo que nos devuelva la funci√≥n lo multiplicamos por 7 para obtener los d√≠as
+		var diasMesCalendario = calcularSemanasCalendario(fechaDib)*7,
+		//calculamos cuantos d√≠as hay vac√≠os
+			diasVacios = diasMesCalendario-diasPintados;
+		//y por cada d√≠a vac√≠o, insertamos un nuevo d√≠a,
+		//como sabemos que el mes que viene empieza en 1,
+		//aprovechamos para rellenar su n√∫mero de d√≠a
+		for (i=1; i<=diasVacios; i++) {
+			$contenedorDias.append($('<a class="diaDeOtroMes" />')
+				.html(i) );
+		}
+		
 	}
 	
 }
