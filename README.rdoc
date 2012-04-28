@@ -1,0 +1,11 @@
+== Welcome to CoolArts Calendar
+Antonio Cordero Hueros
+coArt-Calendar v1.0
+
+Hasta que hay auna versión definitiva todos los comenatrios referentes al proyecto los encontrarás en el archivo js/desarrolloTuto.js
+
+Gracias!
+
+Until i have a definite version an all the code translated to english. I'll keep all the coments about the proyect stored in file: js/desarrolloTuto.js
+
+Thank You!
