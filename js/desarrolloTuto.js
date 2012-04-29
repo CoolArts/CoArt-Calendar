@@ -34,6 +34,35 @@
 //"El Objeto Date de JavaScript" en Cristalab.com:
 //url: http://foros.cristalab.com/el-objeto-date-su-metodos-ejemplos-practicos-y-ejercicios-t105282/
 
+//Las piezas de código precedidas de LINK
+//se crearan avanzado el tutorial
+/////////////////////////////////////
+////////////////LINK1////////////////
+/////////////////////////////////////
+jQuery.fn.arreglarColoresDias = function () {
+	$.each(this.children(), function () {
+		var $celda = $(this);
+		
+		if ($celda.is('.coArtCal_otroMes')) {$celda.addClass('coArtCal-GC')}
+		else if ($celda.is('.coArtCal_hoy')) {$celda.addClass('coArtCal-VC')}
+		else {
+			var posicion = $celda.parent().find('td').index($celda);
+			colorear($celda, posicion)
+		}
+	});
+	
+	function colorear($celda, posicion) {
+		if (posicion < 5) {$celda.addClass('coArtCal-AC')}
+		else {$celda.addClass('coArtCal-AO')}
+	}
+		
+	return this;
+}
+/////////////////////////////////////
+//////////////END LINK1//////////////
+/////////////////////////////////////
+
+
 $(document).ready(function () {caCal('calendario');});
 
 //Creamos la funcion principal
@@ -176,9 +205,9 @@ function caCal (contenedor, anchoContenedor, fecha) {
 	
 	//También le vamos a añadir los nuevos parámetros a nuestra función principal
 	//ANTES:
-	function caCal (fecha) {'...'}
+	///////////////////////function caCal (fecha) {'...'}
 	//AHORA:
-	function caCal (contenedor, anchoContenedor, fecha) {'...'}
+	///////////////////////function caCal (contenedor, anchoContenedor, fecha) {'...'}
 	//dejaremos anchoContenedor y fecha al final, ya que serán parámetros opcionales
 	
 	//La variable "contenedor" será la id del contenedor, será un string ej:('miContenedor')
@@ -211,6 +240,8 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//------------------------------------------------------------------------
 		//Empezaremos por almacenar en una variable la id seleccionable de nuestro contenedor principal
 		var contenedorCal_selId = '#'+contenedorDib,
+		//almacenaremos la fecha de hoy para tenerla a mano
+			fechaDeHoy = new Date();
 		//Vamos a detectar si ya hay algún calendario en el DOM,
 		//en función de los que haya, personalizaremos la id de nuestro calendario.
 		//Vamos a definir una variable de valor 0 en la que los contaremos
@@ -230,7 +261,8 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		$(contenedorCal_selId)
 			//Agregamos nuestro calendario al final del contenido de nuestro contenedor
 			//Le damos una id personalizada
-			.append($('<div id="'+caCal_id+'" />')
+			.append($('<div />')
+				.attr('id', caCal_id)
 				//Le añadimos la clase coolArtsCalendar
 				.addClass('coolArtsCalendar') );
 				//Lo ocultaremos para rellenarlo oculto
@@ -240,9 +272,11 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//Ahora crearemos la tabla que nos servira de calendario,
 		//la crearemos como un objeto para poder ir rellenándola
 		var tabla = $('<table />')
+			.addClass('coArtCal')
 			.append($('<thead />')
-				.append('<tr class="coArtCal_meses" />')
-				.append('<tr class="coArtCal_diasSemana" />')
+				.append($('<tr />')
+					.addClass('coArtCal_mesCurso') )
+				.append('<tr />')
 			)
 			.append('<tbody />');
 		
@@ -268,7 +302,9 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//Ahora crearemos el header con los días de la semana
 		for (diaSemanal in idiomas[idioma].dias) {
 			var dial = idiomas[idioma].dias[diaSemanal];
-			cabeceras.append($('<th />').html(dial))
+			cabeceras.append($('<th />')
+				.addClass('coArtCal_diasSemana coArtCal-GO')
+				.html(dial))
 		}
 		
 		//1-////////////////////////////////////
@@ -319,7 +355,8 @@ function caCal (contenedor, anchoContenedor, fecha) {
 			//Check si es una fecha seleccionada
 			////////////////////////////////////
 			
-			primerTr.append($('<td class="diaDeOtroMes" />')
+			primerTr.append($('<td />')
+				.addClass('coArtCal_otroMes')
 				.html(diasMesAnterior) );
 			//incrementamos en 1 los días pintados y el días del mes anterior
 			diasMesAnterior++;
@@ -337,9 +374,16 @@ function caCal (contenedor, anchoContenedor, fecha) {
 			//Check si es el dia de hoy
 			////////////////////////////////////
 			
-			tbody.children(calcularFila())
-				.append($('<td class="diaMes" />')
-					.html(i) );
+			var $miTr = tbody.children(calcularFila());
+			$miTr.append('<td />');
+			var	$miTd = $miTr.children('td:last-child');
+			$miTd.html(i);
+			
+			if (fechaDib.getMonth() == fechaDeHoy.getMonth() && fechaDib.getDate() == i) {
+					$miTd.addClass('coArtCal_hoy')
+			}
+			else {$miTd.addClass('coArtCal_esteMes')}
+			
 			//incrementamos en 1 los días pintados
 			diasPintados++;
 		}
@@ -353,9 +397,17 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//aprovechamos para rellenar su número de día
 		for (i=1; i<=diasVacios; i++) {
 			tbody.children(calcularFila())
-				.append($('<td class="diaDeOtroMes" />')
+				.append($('<td />')
+					.addClass('coArtCal_otroMes')
 					.html(i) );
 		}
+		
+		//////////////DEFINIR LINK1///////////////
+		
+		$.each(tbody.children(), function() {
+			$(this).arreglarColoresDias()
+		});
+		
 		$contenedorCal.append(tabla);
 	}
 	
