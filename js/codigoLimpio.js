@@ -1,5 +1,6 @@
 $(document).ready(function () {caCal('calendario');});
 
+//Creamos la funcion principal
 function caCal (contenedor, anchoContenedor, fecha) {
 	if (!fecha) {fecha = new Date()};
 	
@@ -42,27 +43,24 @@ function caCal (contenedor, anchoContenedor, fecha) {
 				anoArray = arrayFechas[d].getFullYear();
 				
 			if (anoArray%4 == 0 && anoArray%100 != 0 || anoArray%400 == 0) {bisiexto = 1};
+			
 			diasMeses[1] += bisiexto;
 			totalDias += diasMeses[arrayFechas[d].getMonth()];
 			diasMeses[1] = 28;
 		}
-		
 		return totalDias;
 	}
 	
 	function primerDia (fechaPasada) {
 		if (!fechaPasada) {fechaPasada = new Date()};
-		
 		return new Date(fechaPasada.getFullYear(), fechaPasada.getMonth());
 	}
 	
 	function calcularSemanasCalendario (fechaPasada) {
 		if (!fechaPasada) {fechaPasada = new Date()};
-		
 		var diaSemanal = calcularDiaSemanal(primerDia(fechaPasada)),
 			diasTotales = calcularDiasMeses([fechaPasada]),
 			restoDeDias = diasTotales - (7 - diaSemanal);
-			
 		return 1+(Math.ceil(restoDeDias/7));
 	}
 	
@@ -90,7 +88,8 @@ function caCal (contenedor, anchoContenedor, fecha) {
 	function dibujarCalendario (fechaDib, contenedorDib, anchoContenedor) {
 		var contenedorCal_selId = '#'+contenedorDib,
 			calendariosInstanciados = 0,
-			diasPintados = 0;
+			diasPintados = 0,
+			semanasPintadas = 1;
 			
 		$('.coArtCal_Contenedor').each(function () {calendariosInstanciados++});
 		
@@ -100,12 +99,21 @@ function caCal (contenedor, anchoContenedor, fecha) {
 			.append($('<div id="'+caCal_id+'" />')
 				.addClass('coolArtsCalendar') );
 				
+		var tabla = $('<table />')
+			.append($('<thead />')
+				.append('<tr class="coArtCal_meses" />')
+				.append('<tr class="coArtCal_diasSemana" />')
+			)
+			.append('<tbody />');
+			
+		var cabeceras = tabla.find('thead').find('tr:eq(1)');
+		
 		var contenedorDias_selId = '#' + caCal_id,
-			$contenedorDias = $(contenedorDias_selId);
+			$contenedorCal = $(contenedorDias_selId);
 			
 		for (diaSemanal in idiomas[idioma].dias) {
 			var dial = idiomas[idioma].dias[diaSemanal];
-			$contenedorDias.append($('<div class="coArtCal_diaCabecera" />').html(dial))
+			cabeceras.append($('<th />').html(dial))
 		}
 		
 		var diaDeLaSemana = calcularDiaSemanal(primerDia(fechaDib));
@@ -115,29 +123,44 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		if (mesAnterior == -1) {mesAnterior = 11};
 		
 		var diasMesAnterior = calcularDiasMeses([new Date(fechaDib.getFullYear(), mesAnterior)]);
+		
 		diasMesAnterior -= diaDeLaSemana-1;
-				
+		
+		var semanasCalendario = calcularSemanasCalendario(fechaDib),
+			diasMesCalendario = semanasCalendario*7,
+			tbody = tabla.find('tbody');
+			
+		for (i=0; i<semanasCalendario; i++) {tbody.append('<tr />')}
+		
+		var primerTr = tbody.find('tr:eq(0)');
+		
 		for (i=0; i<diaDeLaSemana; i++) {			
-			$contenedorDias.append($('<a class="diaDeOtroMes" />')
+			primerTr.append($('<td class="diaDeOtroMes" />')
 				.html(diasMesAnterior) );
+				
 			diasMesAnterior++;
 			diasPintados++;
 		}
 		
+		function calcularFila() {
+			return 'tr:eq('+Math.floor(diasPintados/7)+')'
+		}
+		
 		for (i=1; i<=calcularDiasMeses([fechaDib]); i++) {
-			$contenedorDias
-				.append($('<a class="diaMes" />')
+			tbody.children(calcularFila())
+				.append($('<td class="diaMes" />')
 					.html(i) );
 					
 			diasPintados++;
 		}
 		
-		var diasMesCalendario = calcularSemanasCalendario(fechaDib)*7,
-			diasVacios = diasMesCalendario-diasPintados;
-			
+		var diasVacios = diasMesCalendario-diasPintados;
+		
 		for (i=1; i<=diasVacios; i++) {
-			$contenedorDias.append($('<a class="diaDeOtroMes" />')
-				.html(i) );
-		}	
+			tbody.children(calcularFila())
+				.append($('<td class="diaDeOtroMes" />')
+					.html(i) );
+		}
+		$contenedorCal.append(tabla);
 	}
 }

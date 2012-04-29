@@ -56,9 +56,9 @@ function caCal (contenedor, anchoContenedor, fecha) {
 				dias: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
 				meses: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 			}
-		};
+		},
 		//Setearemos el idioma por defecto
-		idioma = 'es';
+		idioma = 'es',
 		//Por último vamos a hacer lo mismo con los días de los meses
 		diasMeses = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 		
@@ -216,8 +216,11 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//Vamos a definir una variable de valor 0 en la que los contaremos
 			calendariosInstanciados = 0,
 		//También vamos a ir rellenando una variable cada vez que pintemos un día
-		//y con el comprobaremos si hemos rellenado el mes completamente.
-			diasPintados = 0;
+		//y con ella comprobaremos si hemos rellenado el mes completamente.
+			diasPintados = 0,
+		//y en nuestra última variable almacenaremos el número de semanas completas pintadas
+		//con ella comprobaremos en que tr hemos de ir incluyendo los días
+			semanasPintadas = 1;
 		//Y por cada calendario que haya, incrementaremos en 1 la variable calendariosInstanciados
 		$('.coArtCal_Contenedor').each(function () {calendariosInstanciados++});
 		//Ahora vamos a almacenar la nueva id personalizada de nuestro calendario en una varibale
@@ -233,7 +236,22 @@ function caCal (contenedor, anchoContenedor, fecha) {
 				//Lo ocultaremos para rellenarlo oculto
 				//Y lo mostraremos una vez relleno
 				//.hide() );
+				
+		//Ahora crearemos la tabla que nos servira de calendario,
+		//la crearemos como un objeto para poder ir rellenándola
+		var tabla = $('<table />')
+			.append($('<thead />')
+				.append('<tr class="coArtCal_meses" />')
+				.append('<tr class="coArtCal_diasSemana" />')
+			)
+			.append('<tbody />');
 		
+		//Almacenamos el header que nos valdrá como cabecera para los días
+		var cabeceras = tabla.find('thead').find('tr:eq(1)');
+		
+		///////////////////////////////////////////////////////////
+		/////////////////////REVISAR
+		///////////////////////////////////////////////////////////
 		//El siguiente paso será crear la cabecera e insertar un div por cada día anterior al primer día.
 		//Después insertaremos un div por cada día del mes,
 		//y le daremos su clase en función a si es el día de hoy,
@@ -242,12 +260,15 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		
 		//Empezaremos almacenando nuestro contenedor en una variable
 		var contenedorDias_selId = '#' + caCal_id,
-			$contenedorDias = $(contenedorDias_selId);
+			$contenedorCal = $(contenedorDias_selId);
+		///////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////
 		
-		//Ahora crearemos la cabecera con los días de la semana
+		//Ahora crearemos el header con los días de la semana
 		for (diaSemanal in idiomas[idioma].dias) {
 			var dial = idiomas[idioma].dias[diaSemanal];
-			$contenedorDias.append($('<div class="coArtCal_diaCabecera" />').html(dial))
+			cabeceras.append($('<th />').html(dial))
 		}
 		
 		//1-////////////////////////////////////
@@ -279,26 +300,45 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		//esto los hacemos para que el primer día que rellenemos sea ese,
 		//y después lo iremos incrementando en 1.
 		diasMesAnterior -= diaDeLaSemana-1;
-				
+		
+		//Para ir rápido echamos mano de nuestra función para calcular las semanas,
+		//lo que nos devuelva lo almacenaremos en una variable,
+		//y también lo multiplicareos por 7 para obtener los días totales que ocupa nuestro mes
+		var semanasCalendario = calcularSemanasCalendario(fechaDib),
+			diasMesCalendario = semanasCalendario*7,
+			tbody = tabla.find('tbody');
+		
+		//Incluiremos una fila en el tbody por cada semana del calendario
+		for (i=0; i<semanasCalendario; i++) {tbody.append('<tr />')}
+		
+		var primerTr = tbody.find('tr:eq(0)');
+		
 		for (i=0; i<diaDeLaSemana; i++) {
+		
 			//2-////////////////////////////////
 			//Check si es una fecha seleccionada
 			////////////////////////////////////
 			
-			$contenedorDias.append($('<a class="diaDeOtroMes" />')
+			primerTr.append($('<td class="diaDeOtroMes" />')
 				.html(diasMesAnterior) );
 			//incrementamos en 1 los días pintados y el días del mes anterior
 			diasMesAnterior++;
 			diasPintados++;
 		}
 		
+		function calcularFila() {
+			return 'tr:eq('+Math.floor(diasPintados/7)+')';
+		}
+		
 		//Ahora por cada día del mes una casilla con su día
 		for (i=1; i<=calcularDiasMeses([fechaDib]); i++) {
+		
 			//2-////////////////////////////////
 			//Check si es el dia de hoy
 			////////////////////////////////////
-			$contenedorDias
-				.append($('<a class="diaMes" />')
+			
+			tbody.children(calcularFila())
+				.append($('<td class="diaMes" />')
 					.html(i) );
 			//incrementamos en 1 los días pintados
 			diasPintados++;
@@ -306,19 +346,17 @@ function caCal (contenedor, anchoContenedor, fecha) {
 		
 		//Y por último comprobamos si hemos rellenado todos los días visibles de las semanas,
 		//y lo que sobre lo rellenamos con nuevas casillas con clase 'diaDeOtroMes'
-		//Para ir rápido echamos mano de nuestra función para calcular las semanas
-		//y lo que nos devuelva la función lo multiplicamos por 7 para obtener los días
-		var diasMesCalendario = calcularSemanasCalendario(fechaDib)*7,
 		//calculamos cuantos días hay vacíos
-			diasVacios = diasMesCalendario-diasPintados;
+		var diasVacios = diasMesCalendario-diasPintados;
 		//y por cada día vacío, insertamos un nuevo día,
 		//como sabemos que el mes que viene empieza en 1,
 		//aprovechamos para rellenar su número de día
 		for (i=1; i<=diasVacios; i++) {
-			$contenedorDias.append($('<a class="diaDeOtroMes" />')
-				.html(i) );
+			tbody.children(calcularFila())
+				.append($('<td class="diaDeOtroMes" />')
+					.html(i) );
 		}
-		
+		$contenedorCal.append(tabla);
 	}
 	
 }
