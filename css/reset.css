@@ -1,0 +1,10 @@
+﻿.coolArtsCalendar * {
+	padding: 0;
+	margin: 0;
+	font-size: 1em;
+}
+
+.coolArtsCalendar div {
+	display: block;
+	position: relative;
+}
