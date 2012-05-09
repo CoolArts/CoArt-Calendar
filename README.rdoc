@@ -1,8 +1,10 @@
-== Welcome to CoolArts Calendar
+==En parada cardiorespiratoria por falta de tiempo
+
+Welcome to CoolArts Calendar
 Antonio Cordero Hueros
 coArt-Calendar v1.0
 
-Hasta que hay auna versiÛn definitiva todos los comenatrios referentes al proyecto los encontrar·s en el archivo js/desarrolloTuto.js
+Hasta que hay auna versi√≥n definitiva todos los comenatrios referentes al proyecto los encontrar√°s en el archivo js/desarrolloTuto.js
 
 Gracias!
 
